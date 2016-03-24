@@ -1,0 +1,2 @@
+# daedalus
+Gaming Analytics Platform
