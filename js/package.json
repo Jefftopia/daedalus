@@ -9,7 +9,8 @@
     "url": "https://github.com/Jefftopia/daedalus"
   },
   "main": "",
-  "scripts": {},
+  "scripts": {
+  },
   "dependencies": {
     "async": "^2.0.0-rc.2",
     "dota2": "^3.0.0",
