@@ -10,6 +10,8 @@
   },
   "main": "",
   "scripts": {
+    "build": "npm install && npm maven",
+    "maven": "mvn java/pom.xml clean install"
   },
   "dependencies": {
     "async": "^2.0.0-rc.2",
