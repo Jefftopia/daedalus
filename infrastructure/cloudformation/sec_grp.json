@@ -1,0 +1,124 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Security Group stack for DS VPC",
+    "Outputs": {
+        "AppSecurityGroupId": {
+            "Description": "Logical ID of AppSecurityGroupsecurity group",
+            "Value": {
+                "Ref": "AppSecurityGroup"
+            }
+        },
+        "BastionSecurityGroupId": {
+            "Description": "Bastion Security Group ID",
+            "Value": {
+                "Ref": "BastionSecurityGroup"
+            }
+        }
+    },
+    "Parameters": {
+        "ProjectName": {
+            "Default": "",
+            "Description": "Name of the current project",
+            "Type": "String"
+        },
+        "VpcId": {
+            "Default": "",
+            "Description": "Logical ID of the VPC",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AppSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Enable communication to and from App",
+                "SecurityGroupEgress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "-1",
+                        "IpProtocol": "-1",
+                        "ToPort": "-1"
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "10.100.0.0/21",
+                        "FromPort": 22,
+                        "IpProtocol": "tcp",
+                        "ToPort": 22
+                    },
+                    {
+                        "CidrIp": "10.1.10.0/23",
+                        "FromPort": 22,
+                        "IpProtocol": "tcp",
+                        "ToPort": 22
+                    },
+                    {
+                        "CidrIp": "172.18.1.0/24",
+                        "FromPort": 22,
+                        "IpProtocol": "tcp",
+                        "ToPort": 22
+                    },
+                    {
+                        "CidrIp": "10.100.0.0/21",
+                        "FromPort": 80,
+                        "IpProtocol": "tcp",
+                        "ToPort": 80
+                    },
+                    {
+                        "CidrIp": "10.100.0.0/21",
+                        "FromPort": 443,
+                        "IpProtocol": "tcp",
+                        "ToPort": 443
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Security Group for App"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    },
+                    {
+                        "Key": "VPC",
+                        "Value": {
+                            "Ref": "VpcId"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "BastionSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Enable communication to bastion host",
+                "SecurityGroupEgress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "-1",
+                        "IpProtocol": "-1",
+                        "ToPort": "-1"
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        }
+    }
+}

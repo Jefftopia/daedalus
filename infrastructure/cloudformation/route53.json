@@ -1,0 +1,55 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Route53 DNS stack for DS",
+    "Outputs": {
+        "HostedZoneId": {
+            "Description": "Logical ID of the Route53 Hosted Zone",
+            "Value": {
+                "Ref": "HostedZone"
+            }
+        }
+    },
+    "Parameters": {
+        "ProjectName": {
+            "Default": "",
+            "Description": "Name of the current project",
+            "Type": "String"
+        },
+        "VpcId": {
+            "Default": "",
+            "Description": "Logical ID of the VPC",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "HostedZone": {
+            "Properties": {
+                "HostedZoneConfig": {
+                    "Comment": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "Internal domain name for ",
+                                {
+                                    "Ref": "ProjectName"
+                                }
+                            ]
+                        ]
+                    }
+                },
+                "Name": "dotastats2.internal",
+                "VPCs": [
+                    {
+                        "VPCId": {
+                            "Ref": "VpcId"
+                        },
+                        "VPCRegion": {
+                            "Ref": "AWS::Region"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::Route53::HostedZone"
+        }
+    }
+}

@@ -1,0 +1,476 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "IAM stack for DS VPC",
+    "Outputs": {
+        "AppInstanceProfile": {
+            "Description": "App IAM Instance Profile",
+            "Value": {
+                "Ref": "AppInstanceProfile"
+            }
+        },
+        "BastionInstanceProfile": {
+            "Description": "Bastion IAM Instance Profile",
+            "Value": {
+                "Ref": "BastionInstanceProfile"
+            }
+        },
+        "LambdaExecutionRoleArn": {
+            "Description": "Amazon Resource Name of the IAM Role for LambdaExecution",
+            "Value": {
+                "Fn::GetAtt": [
+                    "LambdaExecutionRole",
+                    "Arn"
+                ]
+            }
+        }
+    },
+    "Parameters": {
+        "BootstrapBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket for bootstrap scripts",
+            "Type": "String"
+        },
+        "ChefBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket for Chef cookbooks",
+            "Type": "String"
+        },
+        "CloudtrailBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket where Cloudtrail logging is kept",
+            "Type": "String"
+        },
+        "PkgBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket where packages are stored",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AppIamRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "elasticloadbalancing:DescribeLoadBalancers"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowDescribeLoadBalancers"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:ListAllMyBuckets"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowS3ListAllMyBuckets"
+                                },
+                                {
+                                    "Action": "s3:*",
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    {
+                                                        "Ref": "BootstrapBucket"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    {
+                                                        "Ref": "BootstrapBucket"
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "AllowS3BootstrapBucket"
+                                },
+                                {
+                                    "Action": "cloudwatch:*",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowCloudWatch"
+                                },
+                                {
+                                    "Action": [
+                                        "sns:Publish"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowSNSPublish"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::ptdel-dotastats/",
+                                        "arn:aws:s3:::ptdel-dotastats/*"
+                                    ],
+                                    "Sid": "AllowS3AssetsBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::ptdel-cloudtrail/",
+                                        "arn:aws:s3:::ptdel-cloudtrail/*"
+                                    ],
+                                    "Sid": "AllowS3ToolsBucket"
+                                }
+                            ]
+                        },
+                        "PolicyName": "AppPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "AppInstanceProfile": {
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "AppIamRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "BastionIamRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "elasticloadbalancing:DescribeLoadBalancers"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowDescribeLoadBalancers"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:ListAllMyBuckets"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowS3ListAllMyBuckets"
+                                },
+                                {
+                                    "Action": "s3:*",
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    {
+                                                        "Ref": "BootstrapBucket"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    {
+                                                        "Ref": "BootstrapBucket"
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "AllowS3BootstrapBucket"
+                                },
+                                {
+                                    "Action": [
+                                        "sns:Publish"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowSNSPublish"
+                                }
+                            ]
+                        },
+                        "PolicyName": "BastionPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BastionInstanceProfile": {
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "BastionIamRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "ClientGroup": {
+            "Properties": {
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "*",
+                                    "Effect": "Allow",
+                                    "Resource": "*",
+                                    "Sid": "AllowAll"
+                                },
+                                {
+                                    "Action": [
+                                        "aws-portal:ViewBilling",
+                                        "aws-portal:ViewUsage"
+                                    ],
+                                    "Effect": "Deny",
+                                    "Resource": "*",
+                                    "Sid": "DenyBilling"
+                                },
+                                {
+                                    "Action": [
+                                        "ec2:PurchaseReservedInstancesOffering"
+                                    ],
+                                    "Effect": "Deny",
+                                    "Resource": "*",
+                                    "Sid": "DenyPurchaseReservedInstancesOffering"
+                                },
+                                {
+                                    "Action": [
+                                        "rds:PurchaseReservedDBInstancesOffering"
+                                    ],
+                                    "Effect": "Deny",
+                                    "Resource": "*",
+                                    "Sid": "DenyPurchaseReservedDBInstancesOffering"
+                                },
+                                {
+                                    "Action": [
+                                        "redshift:PurchaseReservedNodeOffering"
+                                    ],
+                                    "Effect": "Deny",
+                                    "Resource": "*",
+                                    "Sid": "DenyPurchaseReservedNodeOffering"
+                                },
+                                {
+                                    "Action": "cloudtrail:*",
+                                    "Effect": "Deny",
+                                    "Resource": "*",
+                                    "Sid": "DenyCloudtrail"
+                                },
+                                {
+                                    "Action": [
+                                        "iam:AddRoleToInstanceProfile",
+                                        "iam:AddUserToGroup",
+                                        "iam:CreateAccessKey",
+                                        "iam:CreateAccountAlias",
+                                        "iam:CreateGroup",
+                                        "iam:CreateInstanceProfile",
+                                        "iam:CreateLoginProfile",
+                                        "iam:CreateSAMLProvider",
+                                        "iam:CreateUser",
+                                        "iam:DeleteAccessKey",
+                                        "iam:DeleteAccountAlias",
+                                        "iam:DeleteAccountPasswordPolicy",
+                                        "iam:DeleteGroup",
+                                        "iam:DeleteGroupPolicy",
+                                        "iam:DeleteInstanceProfile",
+                                        "iam:DeleteLoginProfile",
+                                        "iam:DeleteRole",
+                                        "iam:DeleteRolePolicy",
+                                        "iam:DeleteSAMLProvider",
+                                        "iam:DeleteServerCertificate",
+                                        "iam:DeleteSigningCertificate",
+                                        "iam:DeleteUser",
+                                        "iam:DeleteUserPolicy",
+                                        "iam:DeleteVirtualMFADevice",
+                                        "iam:GetAccountPasswordPolicy",
+                                        "iam:GetAccountSummary",
+                                        "iam:GetGroup",
+                                        "iam:GetGroupPolicy",
+                                        "iam:GetInstanceProfile",
+                                        "iam:GetLoginProfile",
+                                        "iam:GetSAMLProvider",
+                                        "iam:GetServerCertificate",
+                                        "iam:GetUser",
+                                        "iam:GetUserPolicy",
+                                        "iam:ListAccessKeys",
+                                        "iam:ListAccountAliases",
+                                        "iam:ListGroupPolicies",
+                                        "iam:ListGroups",
+                                        "iam:ListGroupsForUser",
+                                        "iam:ListInstanceProfiles",
+                                        "iam:ListInstanceProfilesForRole",
+                                        "iam:ListSAMLProviders",
+                                        "iam:ListServerCertificates",
+                                        "iam:ListSigningCertificates",
+                                        "iam:ListUserPolicies",
+                                        "iam:PutGroupPolicy",
+                                        "iam:PutRolePolicy",
+                                        "iam:PutUserPolicy",
+                                        "iam:RemoveRoleFromInstanceProfile",
+                                        "iam:RemoveUserFromGroup",
+                                        "iam:UpdateAccessKey",
+                                        "iam:UpdateAccountPasswordPolicy",
+                                        "iam:UpdateAssumeRolePolicy",
+                                        "iam:UpdateGroup",
+                                        "iam:UpdateLoginProfile",
+                                        "iam:UpdateSAMLProvider",
+                                        "iam:UpdateServerCertificate",
+                                        "iam:UpdateSigningCertificate",
+                                        "iam:UpdateUser",
+                                        "iam:UploadServerCertificate",
+                                        "iam:UploadSigningCertificate"
+                                    ],
+                                    "Effect": "Deny",
+                                    "Resource": [
+                                        "*"
+                                    ],
+                                    "Sid": "DenyIAM"
+                                },
+                                {
+                                    "Action": "s3:*",
+                                    "Effect": "Deny",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    {
+                                                        "Ref": "CloudtrailBucket"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:s3:::",
+                                                    {
+                                                        "Ref": "CloudtrailBucket"
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ],
+                                    "Sid": "DenyS3CloudtrailBucket"
+                                }
+                            ]
+                        },
+                        "PolicyName": "ClientGroupPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Group"
+        },
+        "LambdaExecutionRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                },
+                                {
+                                    "Action": [
+                                        "cloudformation:DescribeStacks"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "root"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        }
+    }
+}
