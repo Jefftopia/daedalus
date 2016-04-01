@@ -1,0 +1,494 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Top-Level stack for DS VPC",
+    "Mappings": {
+        "AmznLinux": {
+            "ap-northeast-1": {
+                "HVM": "ami-a22fb8a2",
+                "HVMwithEBS": "ami-9a2fb89a",
+                "PV": "ami-a42fb8a4",
+                "PVwithEBS": "ami-9c2fb89c"
+            },
+            "ap-southeast-1": {
+                "HVM": "ami-ac9481fe",
+                "HVMwithEBS": "ami-52978200",
+                "PV": "ami-4c97821e",
+                "PVwithEBS": "ami-50978202"
+            },
+            "ap-southeast-2": {
+                "HVM": "ami-871856bd",
+                "HVMwithEBS": "ami-c11856fb",
+                "PV": "ami-851856bf",
+                "PVwithEBS": "ami-c71856fd"
+            },
+            "eu-central-1": {
+                "HVM": "ami-a2aeaebf",
+                "HVMwithEBS": "ami-daaeaec7",
+                "PV": "ami-a0aeaebd",
+                "PVwithEBS": "ami-a6aeaebb"
+            },
+            "eu-west-1": {
+                "HVM": "ami-7db9940a",
+                "HVMwithEBS": "ami-69b9941e",
+                "PV": "ami-8fbe93f8",
+                "PVwithEBS": "ami-a3be93d4"
+            },
+            "sa-east-1": {
+                "HVM": "ami-030c991e",
+                "HVMwithEBS": "ami-3b0c9926",
+                "PV": "ami-010c991c",
+                "PVwithEBS": "ami-370c992a"
+            },
+            "us-east-1": {
+                "HVM": "ami-65116700",
+                "HVMwithEBS": "ami-e3106686",
+                "PV": "ami-971066f2",
+                "PVwithEBS": "ami-cf1066aa"
+            },
+            "us-west-1": {
+                "HVM": "ami-c33aff87",
+                "HVMwithEBS": "ami-cd3aff89",
+                "PV": "ami-c93aff8d",
+                "PVwithEBS": "ami-d53aff91"
+            },
+            "us-west-2": {
+                "HVM": "ami-bbf7e88b",
+                "HVMwithEBS": "ami-9ff7e8af",
+                "PV": "ami-bdf7e88d",
+                "PVwithEBS": "ami-81f7e8b1"
+            }
+        },
+        "CentOS7": {
+            "ap-northeast-1": {
+                "HVM": "ami-d38dc6e9"
+            },
+            "ap-southeast-1": {
+                "HVM": "ami-2a7b6b78"
+            },
+            "ap-southeast-2": {
+                "HVM": "ami-b80b6db8"
+            },
+            "eu-central-1": {
+                "HVM": "ami-33734044"
+            },
+            "eu-west-1": {
+                "HVM": "ami-e68f82fb"
+            },
+            "sa-east-1": {
+                "HVM": "ami-fd0197e0"
+            },
+            "us-east-1": {
+                "HVM": "ami-61bbf104"
+            },
+            "us-west-1": {
+                "HVM": "ami-f77fbeb3"
+            },
+            "us-west-2": {
+                "HVM": "ami-d440a6e7"
+            }
+        },
+        "UbuntuTrusty": {
+            "ap-northeast-1": {
+                "HVM": "ami-ee294bee",
+                "HVMwithEBS": "ami-402e4c40",
+                "PV": "ami-32254732",
+                "PVwithEBS": "ami-362e4c36"
+            },
+            "ap-southeast-1": {
+                "HVM": "ami-a01003f2",
+                "HVMwithEBS": "ami-42170410",
+                "PV": "ami-2e11027c",
+                "PVwithEBS": "ami-54170406"
+            },
+            "ap-southeast-2": {
+                "HVM": "ami-016c263b",
+                "HVMwithEBS": "ami-6d6c2657",
+                "PV": "ami-c96e24f3",
+                "PVwithEBS": "ami-776c264d"
+            },
+            "eu-central-1": {
+                "HVM": "ami-90262a8d",
+                "HVMwithEBS": "ami-46272b5b",
+                "PV": "ami-84252999",
+                "PVwithEBS": "ami-48272b55"
+            },
+            "eu-west-1": {
+                "HVM": "ami-fb38048c",
+                "HVMwithEBS": "ami-37360a40",
+                "PV": "ami-91437fe6",
+                "PVwithEBS": "ami-5b360a2c"
+            },
+            "sa-east-1": {
+                "HVM": "ami-8348d99e",
+                "HVMwithEBS": "ami-1f4bda02",
+                "PV": "ami-cf49d8d2",
+                "PVwithEBS": "ami-e148d9fc"
+            },
+            "us-east-1": {
+                "HVM": "ami-b91042dc",
+                "HVMwithEBS": "ami-ff02509a",
+                "PV": "ami-11f9aa74",
+                "PVwithEBS": "ami-e902508c"
+            },
+            "us-west-1": {
+                "HVM": "ami-2f8b486b",
+                "HVMwithEBS": "ami-198a495d",
+                "PV": "ami-c7864583",
+                "PVwithEBS": "ami-138a4957"
+            },
+            "us-west-2": {
+                "HVM": "ami-e8e102db",
+                "HVMwithEBS": "ami-8ee605bd",
+                "PV": "ami-aa9a7999",
+                "PVwithEBS": "ami-82e605b1"
+            }
+        }
+    },
+    "Parameters": {
+        "BootstrapBucket": {
+            "Default": "ptdel-dotastats/bootstrap",
+            "Description": "Name of the S3 bucket for bootstrap scripts",
+            "Type": "String"
+        },
+        "ChefBucket": {
+            "Default": "ptdel-dotastats/chef",
+            "Description": "Name of the S3 bucket for Chef cookbooks",
+            "Type": "String"
+        },
+        "CloudFormationBucket": {
+            "Default": "ptdel-dotastats/cloudformation",
+            "Description": "Name of the S3 bucket for CloudFormation JSON",
+            "Type": "String"
+        },
+        "CloudtrailBucket": {
+            "Default": "ptdel-cloudtrail",
+            "Description": "Name of the S3 bucket where Cloudtrail logging is kept",
+            "Type": "String"
+        },
+        "PkgBucket": {
+            "Default": "ptdel-dotastats/pkg",
+            "Description": "Name of the S3 bucket where packages are stored",
+            "Type": "String"
+        },
+        "ProjectName": {
+            "Default": "DS",
+            "Description": "Name of the current project",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "App": {
+            "Properties": {
+                "Parameters": {
+                    "AmiId": {
+                        "Fn::FindInMap": [
+                            "AmznLinux",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            "HVMwithEBS"
+                        ]
+                    },
+                    "BootstrapBucket": {
+                        "Ref": "BootstrapBucket"
+                    },
+                    "IamInstanceProfile": {
+                        "Fn::GetAtt": [
+                            "IAM",
+                            "Outputs.AppInstanceProfile"
+                        ]
+                    },
+                    "InstanceSecurityGroups": {
+                        "Fn::GetAtt": [
+                            "SecurityGroup",
+                            "Outputs.AppSecurityGroupId"
+                        ]
+                    },
+                    "InstanceType": "t2.nano",
+                    "ProjectName": {
+                        "Ref": "ProjectName"
+                    },
+                    "SnsTopic": {
+                        "Fn::GetAtt": [
+                            "SNS",
+                            "Outputs.SnsNotificationsTopicArn"
+                        ]
+                    },
+                    "StackName": "App",
+                    "VpcZoneIdentifierAz1": {
+                        "Fn::GetAtt": [
+                            "NetworkOutputs",
+                            "PrivateSubnetAz1Id"
+                        ]
+                    },
+                    "VpcZoneIdentifierAz2": {
+                        "Fn::GetAtt": [
+                            "NetworkOutputs",
+                            "PrivateSubnetAz2Id"
+                        ]
+                    }
+                },
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "https://s3.amazonaws.com/",
+                            {
+                                "Ref": "CloudFormationBucket"
+                            },
+                            "/",
+                            "app.json"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "Bastion": {
+            "Properties": {
+                "Parameters": {
+                    "AmiId": {
+                        "Fn::FindInMap": [
+                            "AmznLinux",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            "HVMwithEBS"
+                        ]
+                    },
+                    "BootstrapBucket": {
+                        "Ref": "BootstrapBucket"
+                    },
+                    "IamInstanceProfile": {
+                        "Fn::GetAtt": [
+                            "IAM",
+                            "Outputs.BastionInstanceProfile"
+                        ]
+                    },
+                    "InstanceSecurityGroups": {
+                        "Fn::GetAtt": [
+                            "SecurityGroup",
+                            "Outputs.BastionSecurityGroupId"
+                        ]
+                    },
+                    "ProjectName": {
+                        "Ref": "ProjectName"
+                    },
+                    "SnsTopic": {
+                        "Fn::GetAtt": [
+                            "SNS",
+                            "Outputs.SnsNotificationsTopicArn"
+                        ]
+                    },
+                    "VpcZoneIdentifierAz1": {
+                        "Fn::GetAtt": [
+                            "NetworkOutputs",
+                            "PublicSubnetAz1Id"
+                        ]
+                    },
+                    "VpcZoneIdentifierAz2": {
+                        "Fn::GetAtt": [
+                            "NetworkOutputs",
+                            "PublicSubnetAz2Id"
+                        ]
+                    }
+                },
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "https://s3.amazonaws.com/",
+                            {
+                                "Ref": "CloudFormationBucket"
+                            },
+                            "/",
+                            "bastion.json"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "IAM": {
+            "Properties": {
+                "Parameters": {
+                    "BootstrapBucket": {
+                        "Ref": "BootstrapBucket"
+                    },
+                    "ChefBucket": {
+                        "Ref": "ChefBucket"
+                    },
+                    "CloudtrailBucket": {
+                        "Ref": "CloudtrailBucket"
+                    },
+                    "PkgBucket": {
+                        "Ref": "PkgBucket"
+                    }
+                },
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "https://s3.amazonaws.com/",
+                            {
+                                "Ref": "CloudFormationBucket"
+                            },
+                            "/",
+                            "iam.json"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "NetworkLookup": {
+            "DependsOn": "IAM",
+            "Properties": {
+                "Code": {
+                    "ZipFile": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "var response = require('cfn-response');",
+                                "exports.handler = function(event, context) {",
+                                "    console.log('REQUEST RECEIVED:\\n', JSON.stringify(event));",
+                                "    if (event.RequestType == 'Delete') {",
+                                "        response.send(event, context, response.SUCCESS);",
+                                "        return;",
+                                "    }",
+                                "    var stackName = event.ResourceProperties.StackName;",
+                                "    var responseData = {};",
+                                "    if (stackName) {",
+                                "        var aws = require('aws-sdk');",
+                                "        var cfn = new aws.CloudFormation();",
+                                "        cfn.describeStacks({StackName: stackName}, function(err, data) {",
+                                "            if (err) {",
+                                "                responseData = {Error: 'DescribeStacks call failed'};",
+                                "                console.log(responseData.Error + ':\\n', err);",
+                                "                response.send(event, context, response.FAILED, responseData);",
+                                "            }",
+                                "            else {",
+                                "                data.Stacks[0].Outputs.forEach(function(output) {",
+                                "                    responseData[output.OutputKey] = output.OutputValue;",
+                                "                });",
+                                "                response.send(event, context, response.SUCCESS, responseData);",
+                                "            }",
+                                "        });",
+                                "    } else {",
+                                "        responseData = {Error: 'Stack name not specified'};",
+                                "        console.log(responseData.Error);",
+                                "        response.send(event, context, response.FAILED, responseData);",
+                                "    }",
+                                "};"
+                            ]
+                        ]
+                    }
+                },
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IAM",
+                        "Outputs.LambdaExecutionRoleArn"
+                    ]
+                },
+                "Runtime": "nodejs"
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "NetworkOutputs": {
+            "Properties": {
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "NetworkLookup",
+                        "Arn"
+                    ]
+                },
+                "StackName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "ProjectName"
+                            },
+                            "-Network"
+                        ]
+                    ]
+                }
+            },
+            "Type": "Custom::NetworkOutputs"
+        },
+        "Route53": {
+            "Properties": {
+                "Parameters": {
+                    "ProjectName": {
+                        "Ref": "ProjectName"
+                    },
+                    "VpcId": {
+                        "Fn::GetAtt": [
+                            "NetworkOutputs",
+                            "VpcId"
+                        ]
+                    }
+                },
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "https://s3.amazonaws.com/",
+                            {
+                                "Ref": "CloudFormationBucket"
+                            },
+                            "/",
+                            "route53.json"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "SNS": {
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "https://s3.amazonaws.com/",
+                            {
+                                "Ref": "CloudFormationBucket"
+                            },
+                            "/",
+                            "sns.json"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "SecurityGroup": {
+            "Properties": {
+                "Parameters": {
+                    "VpcId": {
+                        "Fn::GetAtt": [
+                            "NetworkOutputs",
+                            "VpcId"
+                        ]
+                    }
+                },
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "https://s3.amazonaws.com/",
+                            {
+                                "Ref": "CloudFormationBucket"
+                            },
+                            "/",
+                            "sec_grp.json"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        }
+    }
+}

@@ -1,0 +1,254 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "App stack for DS VPC",
+    "Parameters": {
+        "AmiId": {
+            "Default": "",
+            "Description": "AMI ID for Launch Configuration",
+            "Type": "String"
+        },
+        "BootstrapBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket for bootstrap scripts",
+            "Type": "String"
+        },
+        "IamInstanceProfile": {
+            "Default": "",
+            "Description": "IAM Instance Profile ARN",
+            "Type": "String"
+        },
+        "InstanceSecurityGroups": {
+            "Default": "",
+            "Description": "Security Groups assigned to instances in ASG",
+            "Type": "String"
+        },
+        "InstanceType": {
+            "Default": "",
+            "Description": "Instance Type",
+            "Type": "String"
+        },
+        "ProjectName": {
+            "Default": "",
+            "Description": "Name of the current project",
+            "Type": "String"
+        },
+        "SnsTopic": {
+            "Default": "",
+            "Description": "SNS Topic to be used in bootstrap",
+            "Type": "String"
+        },
+        "StackName": {
+            "Default": "",
+            "Description": "Name for this stack",
+            "Type": "String"
+        },
+        "VpcZoneIdentifierAz1": {
+            "Default": "",
+            "Description": "VPC Zone Id used for ASG in AZ1",
+            "Type": "String"
+        },
+        "VpcZoneIdentifierAz2": {
+            "Default": "",
+            "Description": "VPC Zone Id used for ASG in AZ2",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AutoScalingGroup": {
+            "Properties": {
+                "AvailabilityZones": [
+                    {
+                        "Fn::Select": [
+                            "0",
+                            {
+                                "Fn::GetAZs": ""
+                            }
+                        ]
+                    },
+                    {
+                        "Fn::Select": [
+                            "1",
+                            {
+                                "Fn::GetAZs": ""
+                            }
+                        ]
+                    }
+                ],
+                "DesiredCapacity": 1,
+                "HealthCheckGracePeriod": 300,
+                "HealthCheckType": "EC2",
+                "LaunchConfigurationName": {
+                    "Ref": "LaunchConfig"
+                },
+                "LoadBalancerNames": [],
+                "MaxSize": 2,
+                "MinSize": 1,
+                "NotificationConfigurations": [
+                    {
+                        "NotificationTypes": [
+                            "autoscaling:EC2_INSTANCE_LAUNCH",
+                            "autoscaling:EC2_INSTANCE_TERMINATE"
+                        ],
+                        "TopicARN": {
+                            "Ref": "SnsTopic"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "PropagateAtLaunch": true,
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "ProjectName"
+                                    },
+                                    "-",
+                                    {
+                                        "Ref": "StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "project",
+                        "PropagateAtLaunch": true,
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    }
+                ],
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "VpcZoneIdentifierAz1"
+                    },
+                    {
+                        "Ref": "VpcZoneIdentifierAz2"
+                    }
+                ]
+            },
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "UpdatePolicy": {
+                "AutoScalingRollingUpdate": {
+                    "MaxBatchSize": "1",
+                    "MinInstancesInService": "1",
+                    "PauseTime": "PT0M30S"
+                }
+            }
+        },
+        "LaunchConfig": {
+            "Properties": {
+                "AssociatePublicIpAddress": "false",
+                "BlockDeviceMappings": [],
+                "IamInstanceProfile": {
+                    "Ref": "IamInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "common-",
+                            {
+                                "Ref": "AWS::Region"
+                            }
+                        ]
+                    ]
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "InstanceSecurityGroups"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/usr/bin/env bash\n",
+                                "export PROJECT=",
+                                {
+                                    "Ref": "ProjectName"
+                                },
+                                "\n",
+                                "export ROLE=",
+                                "app",
+                                "\nexport SNS_TOPIC=",
+                                {
+                                    "Ref": "SnsTopic"
+                                },
+                                "\n",
+                                "if [ $(which apt-get) ] ; then",
+                                "\n",
+                                "export DEBIAN_FRONTEND=noninteractive",
+                                "\n",
+                                "apt-get update",
+                                "\n",
+                                "apt-get -y install python-pip",
+                                "\n",
+                                "elif [ $(which yum) ] ; then",
+                                "\n",
+                                "if [ -e /etc/redhat-release ]; then",
+                                "\n",
+                                "yum -y install wget",
+                                "\n",
+                                "RELEASE=$(cut -d ' ' -f 7 /etc/redhat-release | cut -d '.' -f 1)",
+                                "\n",
+                                "wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm",
+                                "\n",
+                                "rpm -Uvh epel-release*.rpm",
+                                "\n",
+                                "else",
+                                "\n",
+                                "yum -y install epel-release",
+                                "\n",
+                                "fi",
+                                "\n",
+                                "yum makecache fast",
+                                "\n",
+                                "yum -y install python-pip",
+                                "\n",
+                                "fi",
+                                "\n",
+                                "pip install --upgrade awscli",
+                                "\n",
+                                "aws s3 cp s3://",
+                                {
+                                    "Ref": "BootstrapBucket"
+                                },
+                                "/",
+                                "app",
+                                ".sh",
+                                " /usr/local/bin/",
+                                "app",
+                                ".sh",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " \n",
+                                "chmod 770 /usr/local/bin/",
+                                "app",
+                                ".sh",
+                                " \n",
+                                "/usr/local/bin/",
+                                "app",
+                                ".sh",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::AutoScaling::LaunchConfiguration"
+        }
+    }
+}

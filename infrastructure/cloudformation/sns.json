@@ -1,0 +1,47 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "SNS stack for DS VPC",
+    "Outputs": {
+        "SnsAlertsTopicArn": {
+            "Description": "Amazon Resource Name for Alerts SNS topic",
+            "Value": {
+                "Ref": "SnsAlertsTopic"
+            }
+        },
+        "SnsNotificationsTopicArn": {
+            "Description": "Amazon Resource Name for Notifications SNS topic",
+            "Value": {
+                "Ref": "SnsNotificationsTopic"
+            }
+        },
+        "SnsSMSTopicArn": {
+            "Description": "Amazon Resource Name for SMS SNS topic",
+            "Value": {
+                "Ref": "SnsSmsTopic"
+            }
+        }
+    },
+    "Resources": {
+        "SnsAlertsTopic": {
+            "Properties": {
+                "DisplayName": "Ds-Alerts",
+                "TopicName": "Ds-Alerts"
+            },
+            "Type": "AWS::SNS::Topic"
+        },
+        "SnsNotificationsTopic": {
+            "Properties": {
+                "DisplayName": "Ds-Notifications",
+                "TopicName": "Ds-Notifications"
+            },
+            "Type": "AWS::SNS::Topic"
+        },
+        "SnsSmsTopic": {
+            "Properties": {
+                "DisplayName": "Ds-SMS",
+                "TopicName": "Ds-SMS"
+            },
+            "Type": "AWS::SNS::Topic"
+        }
+    }
+}

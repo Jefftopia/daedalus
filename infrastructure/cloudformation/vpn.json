@@ -1,0 +1,279 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "VPN stack for DS VPC",
+    "Parameters": {
+        "AmiId": {
+            "Default": "",
+            "Description": "AMI ID for Launch Configuration",
+            "Type": "String"
+        },
+        "BootstrapBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket for bootstrap scripts",
+            "Type": "String"
+        },
+        "ChefBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket for Chef cookbooks",
+            "Type": "String"
+        },
+        "IamInstanceProfile": {
+            "Default": "",
+            "Description": "IAM Instance Profile ARN",
+            "Type": "String"
+        },
+        "InstanceSecurityGroups": {
+            "Default": "",
+            "Description": "Security Groups assigned to instances in ASG",
+            "Type": "String"
+        },
+        "InstanceType": {
+            "Default": "t2.medium",
+            "Description": "Instance Type",
+            "Type": "String"
+        },
+        "PkgBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket where packages are stored",
+            "Type": "String"
+        },
+        "ProjectName": {
+            "Default": "",
+            "Description": "Name of the current project",
+            "Type": "String"
+        },
+        "SnsTopic": {
+            "Default": "",
+            "Description": "SNS Topic to be used in bootstrap",
+            "Type": "String"
+        },
+        "VpcZoneIdentifierAz1": {
+            "Default": "",
+            "Description": "VPC Zone Id used for ASG in AZ1",
+            "Type": "String"
+        },
+        "VpcZoneIdentifierAz2": {
+            "Default": "",
+            "Description": "VPC Zone Id used for ASG in AZ2",
+            "Type": "String"
+        },
+        "VpnBucket": {
+            "Default": "",
+            "Description": "Name of the S3 bucket where VPN data is stored",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AlarmHighCpu": {
+            "Properties": {
+                "AlarmActions": [
+                    {
+                        "Ref": "SnsTopic"
+                    }
+                ],
+                "AlarmDescription": "High CPU",
+                "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "AutoScalingGroup"
+                        }
+                    }
+                ],
+                "EvaluationPeriods": "1",
+                "MetricName": "CPUUtilization",
+                "Namespace": "AWS/EC2",
+                "Period": "60",
+                "Statistic": "Average",
+                "Threshold": "90"
+            },
+            "Type": "AWS::CloudWatch::Alarm"
+        },
+        "AsgLaunchConfiguration": {
+            "Properties": {
+                "AssociatePublicIpAddress": "true",
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": "10",
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "IamInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "common-",
+                            {
+                                "Ref": "AWS::Region"
+                            }
+                        ]
+                    ]
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "InstanceSecurityGroups"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/usr/bin/env bash\n",
+                                "if [ $(which apt-get) ] ; then",
+                                "\n",
+                                "export DEBIAN_FRONTEND=noninteractive",
+                                "\n",
+                                "apt-get update",
+                                "\n",
+                                "apt-get -y install python-pip",
+                                "\n",
+                                "elif [ $(which yum) ] ; then",
+                                "\n",
+                                "yum -y install epel-release",
+                                "\n",
+                                "yum makecache fast",
+                                "\n",
+                                "yum -y groupinstall 'Development Tools'",
+                                "\n",
+                                "yum -y install python-pip",
+                                "\n",
+                                "fi",
+                                "\n",
+                                "pip install --upgrade awscli",
+                                "\n",
+                                "export PROJECT=",
+                                {
+                                    "Ref": "ProjectName"
+                                },
+                                "\n",
+                                "export SNS_TOPIC=",
+                                {
+                                    "Ref": "SnsTopic"
+                                },
+                                "\n",
+                                "export EIPALLOC=",
+                                {
+                                    "Fn::GetAtt": [
+                                        "EipVpn",
+                                        "AllocationId"
+                                    ]
+                                },
+                                "\n",
+                                "export CHEF_BKT=",
+                                {
+                                    "Ref": "ChefBucket"
+                                },
+                                "\n",
+                                "export PKG_BKT=",
+                                {
+                                    "Ref": "PkgBucket"
+                                },
+                                "\n",
+                                "aws s3 cp s3://",
+                                {
+                                    "Ref": "BootstrapBucket"
+                                },
+                                "/vpn.sh",
+                                " /usr/local/bin/vpn.sh",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " \n",
+                                "chmod 770 /usr/local/bin/vpn.sh",
+                                " \n",
+                                "/usr/local/bin/vpn.sh",
+                                " \n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::AutoScaling::LaunchConfiguration"
+        },
+        "AutoScalingGroup": {
+            "Properties": {
+                "AvailabilityZones": [
+                    {
+                        "Fn::Select": [
+                            "0",
+                            {
+                                "Fn::GetAZs": ""
+                            }
+                        ]
+                    },
+                    {
+                        "Fn::Select": [
+                            "1",
+                            {
+                                "Fn::GetAZs": ""
+                            }
+                        ]
+                    }
+                ],
+                "DesiredCapacity": "1",
+                "HealthCheckGracePeriod": "300",
+                "HealthCheckType": "EC2",
+                "LaunchConfigurationName": {
+                    "Ref": "AsgLaunchConfiguration"
+                },
+                "MaxSize": "2",
+                "MinSize": "1",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "PropagateAtLaunch": true,
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "ProjectName"
+                                    },
+                                    "-VPN"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "project",
+                        "PropagateAtLaunch": true,
+                        "Value": {
+                            "Ref": "ProjectName"
+                        }
+                    }
+                ],
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "VpcZoneIdentifierAz1"
+                    },
+                    {
+                        "Ref": "VpcZoneIdentifierAz2"
+                    }
+                ]
+            },
+            "Type": "AWS::AutoScaling::AutoScalingGroup"
+        },
+        "EipVpn": {
+            "Properties": {
+                "Domain": "vpc"
+            },
+            "Type": "AWS::EC2::EIP"
+        }
+    }
+}
