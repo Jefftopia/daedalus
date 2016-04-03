@@ -2,7 +2,9 @@ java/target
 js/target
 node_modules
 jspm_packages
+bower_components
 *.dem
 *.zip
 *.gzip
 *.bz2
+.c9
