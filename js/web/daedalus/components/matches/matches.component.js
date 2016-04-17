@@ -46,16 +46,19 @@ System.register(['angular2/core', 'angular2/common', 'angular2/router', '../../s
                 MatchesComponent.prototype.getData = function () {
                     var _this = this;
                     this.matchesService.getMatches()
-                        .subscribe(function (res) { return _this.result = res.result; }, function (err) { return console.log("HEY, something went wrongable", err); }, function () { return console.log('complete message'); });
+                        .subscribe(function (res) {
+                        _this.result = res;
+                        _this.matches = _this.result.matches;
+                    }, function (err) { return console.log("HEY, something went wrongable", err); }, function () { return console.log('complete message'); });
                 };
                 MatchesComponent.prototype.goTo = function (matchId) {
-                    this.router.parent.navigate(['./MatchDetail', { matchId: matchId }]);
+                    this.router.parent.navigate(['MatchDetail', { id: matchId }]);
                 };
                 MatchesComponent = __decorate([
                     core_1.Component({
                         selector: 'dota-matches',
                         directives: [common_1.COMMON_DIRECTIVES],
-                        template: "\n    <div class=\"container\">\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div class=\"items-view\">\n                    <div class=\"panel panel-default\" *ng-for=\"#match of result.matches\">\n                        <div class=\"panel-heading\"><a (click)=\"goTo(match.match_id)\">{{ match.match_id }}</a></div>\n                        <div class=\"panel-body\">\n                            <table class=\"table table-hover\">\n                                <thead>\n                                    <tr>\n                                        <th>Start Time</th>\n                                        <th> Sequence #</th>\n                                        <th> # Players </th>\n                                    </tr>\n                                </thead>\n                                <tbody>\n                                    <tr>\n                                        <td> {{ match.start_time | date : 'short' }} </td>\n                                        <td> {{ match.match_seq_num }} </td>\n                                        <td> {{ match.players.length }} </td>\n                                    </tr>\n                                </tbody>\t\n                            </table>\n                            \n                        </div>\n                        <div class=\"panel-footer\">\n                            <button (click)=\"goTo(match.match_id)\" class=\"btn btn-success\">Match Details</button>\t\t\n                        </div>\n                    </div>\n                </div>\n            </div>    \n        </div>\n    </div>\n    "
+                        template: "\n    <div class=\"container\">\n        <div class=\"row\">\n            <div class=\"col-xs-12 col-sm-12 col-md-6 col-lg-6\">\n                <ul class=\"list-group\" *ngFor=\"#match of matches\">\n                    <li class=\"list-group-item\">\n                        <span> {{ match.match_seq_num }} </span>\n                        <span> {{ match.players.length }} </span>\n                        <button (click)=\"goTo(match.match_id)\" class=\"btn btn-success\">Match Details</button>\t\t\n                    </li>\n                </ul>\n            </div>    \n        </div>\n    </div>\n    "
                     }), 
                     __metadata('design:paramtypes', [dotaMatches_service_1.DotaMatchesService, router_1.Router])
                 ], MatchesComponent);

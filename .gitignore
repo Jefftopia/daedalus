@@ -4,7 +4,6 @@ node_modules
 jspm_packages
 bower_components
 js/web/daedalus/**/*.js
-daedalus.**/*.js
 *.dem
 *.zip
 *.gzip

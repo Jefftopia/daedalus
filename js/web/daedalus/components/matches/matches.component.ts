@@ -11,40 +11,24 @@ export enum ISkillType {
     very_high = 3
 }
 
+interface IMatchesResult {
+    matches: any[];
+}
+
 @Component({
     selector: 'dota-matches',
     directives: [COMMON_DIRECTIVES],
     template: `
     <div class="container">
         <div class="row">
-            <div class="col-md-6">
-                <div class="items-view">
-                    <div class="panel panel-default" *ng-for="#match of result.matches">
-                        <div class="panel-heading"><a (click)="goTo(match.match_id)">{{ match.match_id }}</a></div>
-                        <div class="panel-body">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Start Time</th>
-                                        <th> Sequence #</th>
-                                        <th> # Players </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td> {{ match.start_time | date : 'short' }} </td>
-                                        <td> {{ match.match_seq_num }} </td>
-                                        <td> {{ match.players.length }} </td>
-                                    </tr>
-                                </tbody>	
-                            </table>
-                            
-                        </div>
-                        <div class="panel-footer">
-                            <button (click)="goTo(match.match_id)" class="btn btn-success">Match Details</button>		
-                        </div>
-                    </div>
-                </div>
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                <ul class="list-group" *ngFor="#match of matches">
+                    <li class="list-group-item">
+                        <span> {{ match.match_seq_num }} </span>
+                        <span> {{ match.players.length }} </span>
+                        <button (click)="goTo(match.match_id)" class="btn btn-success">Match Details</button>		
+                    </li>
+                </ul>
             </div>    
         </div>
     </div>
@@ -52,7 +36,9 @@ export enum ISkillType {
 })
 export class MatchesComponent implements OnInit {
 
-    public result: {};
+    public result: IMatchesResult;
+    
+    public matches: any[];
     
     private matchesService: DotaMatchesService;
     
@@ -74,14 +60,19 @@ export class MatchesComponent implements OnInit {
     public getData(): any {
         this.matchesService.getMatches()
         .subscribe(
-            res => this.result = res.result,
+            res => {
+                this.result = res ;
+                this.matches = this.result.matches; 
+            },
             err => console.log("HEY, something went wrongable", err),
             () => console.log('complete message')
         );
     }
     
     public goTo(matchId: string): void {
-        this.router.parent.navigate(['./MatchDetail', { matchId: matchId }])
+        this.router.parent.navigate(['MatchDetail', { id: matchId }])
     }
     
 }
+
+//<span> {{ match.start_time | date : 'short' }} </span>

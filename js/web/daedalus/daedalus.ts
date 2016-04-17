@@ -15,7 +15,7 @@ import { MatchesComponent } from './components/matches/matches.component';
             <a href="#" class="navbar-brand">Daedalus</a>
             <ul class="nav navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['LaunchPad']">LaunchPad</a>          
+                    <a class="nav-link" [routerLink]="['LaunchPad']">Home</a>          
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" [routerLink]="['Matches']">Matches</a>        
@@ -32,7 +32,7 @@ import { MatchesComponent } from './components/matches/matches.component';
 @RouteConfig([
     { path: '/launchpad', name: 'LaunchPad', component: LaunchPadComponent, useAsDefault: true },
     { path: '/matches', name: 'Matches', component: MatchesComponent  },
-    { path:'/match/:name', name: 'Match', component: MatchDetailComponent }
+    { path:'/match/:id', name: 'MatchDetail', component: MatchDetailComponent }
 ])
 export class Daedalus implements OnInit {
         

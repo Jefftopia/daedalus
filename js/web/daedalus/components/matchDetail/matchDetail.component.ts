@@ -1,7 +1,7 @@
 import { Component, OnInit, OnChanges, SimpleChange, ChangeDetectionStrategy } from 'angular2/core';
 import { COMMON_DIRECTIVES } from 'angular2/common';
 import { FORM_DIRECTIVES } from 'angular2/common';
-import { RouteConfig, ROUTER_DIRECTIVES, Router, RouteParams } from 'angular2/router';
+import { Router, RouteParams } from 'angular2/router';
 import { DotaMatchDetailService } from '../../services/dotaMatchDetail.service';
 import { ItemMap } from '../../services/dotaItemMap.service' ;
 import { HeroMap } from '../../services/dotaHeroMap.service' ;
@@ -13,11 +13,12 @@ export interface DotaHttpMatchDetailsOptions {
 @Component({
     selector: 'dota-match-details',
     directives: [COMMON_DIRECTIVES],
+    providers: [ItemMap, HeroMap],
     template: `
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">Match <span>{{ matchDetails.match_id }}</span> Details</div>
-                <div class="panel-body">
+            <div class="card">
+                <div class="card-block">
+                    <div class="card-title">Match <span>{{ matchDetails.match_id }}</span> Details</div>
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -36,9 +37,6 @@ export interface DotaHttpMatchDetailsOptions {
                             </tr>
                         </tbody>	
                     </table>
-                </div>
-                <div class="panel-footer">
-                    <button (click)="showRes()" class="btn btn-primary">Log Details</button>
                 </div>
             </div>
         </div>
@@ -64,9 +62,9 @@ export interface DotaHttpMatchDetailsOptions {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ng-for="#player of matchDetails.players">
+                            <tr *ngFor="#player of matchDetails.players">
                                 <td>{{ player.account_id }}</td>
-                                <td><img [src]="getHeroImage(player.hero_id)"></img>{{ player.hero_id }}</td>
+                                <td><img [src]="getHeroImage(player.hero_id)" />{{ player.hero_id }}</td>
                                 <td>{{ player.level }}</td>
                                 <td>{{ player.gold_spent }}</td>
                                 <td>{{ player.kills }}</td>
@@ -76,7 +74,7 @@ export interface DotaHttpMatchDetailsOptions {
                                 <td>{{ player.denies }}</td>
                                 <td>{{ player.gold_per_min }}</td>
                                 <td>{{ player.xp_per_min }}</td>
-                                <td><img [src]="getItemImage(player.item_0)"></img></td>
+                                <td><img [src]="getItemImage(player.item_0)" /></td>
                             </tr>
                         </tbody>
                     </table>
@@ -95,7 +93,7 @@ export class MatchDetailComponent implements OnInit {
 
     public matchDetails: any;
     
-    public matchId: string|number;
+    public matchId: string;
     
     public heroMap: HeroMap;
     
@@ -115,14 +113,17 @@ export class MatchDetailComponent implements OnInit {
 
     ngOnInit(): void {
         this.matchDetails = { data: [] };
-        this.matchId = this.routeParams.get('matchId'); 
-        this.getData();
+        this.matchId = this.routeParams.get('id'); 
+        this.getData(this.matchId);
     }
         
-    public getData(): any {
-        this.matchDetailService.getMatchDetails()
+    public getData(matchId: string): any {
+        this.matchDetailService.getMatchDetails(matchId)
         .subscribe(
-            res => this.matchDetails = res.matchDetails,
+            res => { 
+                console.log('result', res);
+                this.matchDetails = res;
+             },
             err => console.log("HEY, something went wrongable", err),
             () => console.log('complete message')
         );

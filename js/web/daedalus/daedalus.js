@@ -39,12 +39,12 @@ System.register(['angular2/core', 'angular2/router', './components/launchPad/lau
                     core_1.Component({
                         selector: 'daedalus',
                         directives: [router_1.ROUTER_DIRECTIVES],
-                        template: "\n    <header class=\"daedalus-header\">\n    <nav class=\"navbar navbar-static-top navbar-dark bg-primary\">\n        <div class=\"container\">\n            <a href=\"#\" class=\"navbar-brand\">Daedalus</a>\n            <ul class=\"nav navbar-nav\">\n                <li class=\"nav-item\">\n                    <a class=\"nav-link\" [routerLink]=\"['LaunchPad']\">LaunchPad</a>          \n                </li>\n                <li class=\"nav-item\">\n                    <a class=\"nav-link\" [routerLink]=\"['Matches']\">Matches</a>        \n                </li>\n            </ul>\n        </div>\n    </nav>\n    </header>\n    <main>\n        <router-outlet></router-outlet>\n    </main>\n    "
+                        template: "\n    <header class=\"daedalus-header\">\n    <nav class=\"navbar navbar-static-top navbar-dark bg-primary\">\n        <div class=\"container\">\n            <a href=\"#\" class=\"navbar-brand\">Daedalus</a>\n            <ul class=\"nav navbar-nav\">\n                <li class=\"nav-item\">\n                    <a class=\"nav-link\" [routerLink]=\"['LaunchPad']\">Home</a>          \n                </li>\n                <li class=\"nav-item\">\n                    <a class=\"nav-link\" [routerLink]=\"['Matches']\">Matches</a>        \n                </li>\n            </ul>\n        </div>\n    </nav>\n    </header>\n    <main>\n        <router-outlet></router-outlet>\n    </main>\n    "
                     }),
                     router_1.RouteConfig([
                         { path: '/launchpad', name: 'LaunchPad', component: launchPad_component_1.LaunchPadComponent, useAsDefault: true },
                         { path: '/matches', name: 'Matches', component: matches_component_1.MatchesComponent },
-                        { path: '/match/:name', name: 'Match', component: matchDetail_component_1.MatchDetailComponent }
+                        { path: '/match/:id', name: 'MatchDetail', component: matchDetail_component_1.MatchDetailComponent }
                     ]), 
                     __metadata('design:paramtypes', [router_1.Router])
                 ], Daedalus);

@@ -1,32 +1,42 @@
-System.register(['./abstractDota.service'], function(exports_1, context_1) {
+System.register(['angular2/core', './abstractDota.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var __extends = (this && this.__extends) || function (d, b) {
-        for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
     };
-    var abstractDota_service_1;
+    var __metadata = (this && this.__metadata) || function (k, v) {
+        if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+    };
+    var core_1, abstractDota_service_1;
     var DotaMatchDetailService;
     return {
         setters:[
+            function (core_1_1) {
+                core_1 = core_1_1;
+            },
             function (abstractDota_service_1_1) {
                 abstractDota_service_1 = abstractDota_service_1_1;
             }],
         execute: function() {
-            DotaMatchDetailService = (function (_super) {
-                __extends(DotaMatchDetailService, _super);
-                function DotaMatchDetailService() {
-                    _super.apply(this, arguments);
+            DotaMatchDetailService = (function () {
+                function DotaMatchDetailService(dotaRestDao) {
+                    this.dotaRestDao = dotaRestDao;
                 }
-                DotaMatchDetailService.prototype.getMatchDetails = function () {
-                    return this._get(DotaMatchDetailService.BASE_URL);
+                DotaMatchDetailService.prototype.getMatchDetails = function (matchId) {
+                    return this.dotaRestDao.get(DotaMatchDetailService.BASE_URL + 'match_id=' + matchId);
                 };
                 DotaMatchDetailService.prototype.query = function () {
                 };
                 DotaMatchDetailService.BASE_URL = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?';
+                DotaMatchDetailService = __decorate([
+                    core_1.Injectable(), 
+                    __metadata('design:paramtypes', [abstractDota_service_1.DotaRestDao])
+                ], DotaMatchDetailService);
                 return DotaMatchDetailService;
-            }(abstractDota_service_1.DotaRestDao));
+            }());
             exports_1("DotaMatchDetailService", DotaMatchDetailService);
         }
     }

@@ -1,4 +1,4 @@
-import { Http } from 'angular2/http';
+import { Injectable } from 'angular2/core';
 import { DotaRestDao } from './abstractDota.service';
  
 export enum ISkillType {
@@ -19,32 +19,24 @@ export interface DotaHttpMatchHistoryOptions {
     startAtMatch?: string;
     matchesRequested?: number;
 }
- 
-export class DotaMatchesService extends DotaRestDao {
+
+@Injectable()
+export class DotaMatchesService {
+
+    private dotaRestDao: DotaRestDao;
 
     private static BASE_URL: string = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?';
-    
+        
+    constructor(dotaRestDao: DotaRestDao) {        
+        this.dotaRestDao = dotaRestDao;
+    }    
+        
     public getMatches(): any {   
-        return this._get(DotaMatchesService.BASE_URL);
+        return this.dotaRestDao.get(DotaMatchesService.BASE_URL);
     }
 
     public query(): any {
         //return this._query();
     }
-
-    // protected _get(url: string) {
-    //     return this.http.get(url).map(res => {
-    //         return res.json();
-    //     })
-    // }
-    //}
-    
-    /*
-        .subscribe(
-            res => this.result = res.result,
-            err => console.log("HEY, something went wrongable", err),
-            () => console.log('complete message')
-        );    
-    */
 
 }

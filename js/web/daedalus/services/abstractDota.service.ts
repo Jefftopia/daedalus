@@ -1,6 +1,5 @@
+import { Injectable } from 'angular2/core';
 import { Http, Response } from 'angular2/http';
-//import { Observable } from 'rxjs/Rx';
-
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
@@ -23,9 +22,10 @@ export interface getDataOptions {
     filterOptions?: Object
 }
 
-export abstract class DotaRestDao {
+@Injectable()
+export class DotaRestDao {
 
-    private http: Http;
+    public http: Http;
     
     private static API_KEY: string = '7BBDF6F696BB0FA975E8F70C5BBE1716';
     
@@ -36,13 +36,13 @@ export abstract class DotaRestDao {
     }
 
     // returns observable array of any dota model data
-    protected _get(url: string) {
+    public get(url: string) {
         return this.http.get(url + DotaRestDao.REQUEST_SUFFIX)
             .map(this.extractData)
             .catch(this.errorHandler);
     }
     
-    protected _query(url: string) {
+    public query(url: string) {
         //TODO: serialize search using rules above;
     }
     
@@ -50,8 +50,9 @@ export abstract class DotaRestDao {
         if (res.status < 200 || res.status >= 300) {
             throw new Error('Bad response status: ' + res.status);
         }
+                
         let body = res.json();
-        return body.data || { };
+        return body.result || { };
     }
         
     private errorHandler(error: any) {
