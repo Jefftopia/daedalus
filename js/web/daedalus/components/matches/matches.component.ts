@@ -13,6 +13,7 @@ export enum ISkillType {
 
 @Component({
     selector: 'dota-matches',
+    directives: [COMMON_DIRECTIVES],
     template: `
     <div class="container">
         <div class="row">
@@ -47,10 +48,9 @@ export enum ISkillType {
             </div>    
         </div>
     </div>
-    `,
-    directives: [COMMON_DIRECTIVES]
+    `
 })
-export class DotaMatches implements OnInit {
+export class MatchesComponent implements OnInit {
 
     public result: {};
     

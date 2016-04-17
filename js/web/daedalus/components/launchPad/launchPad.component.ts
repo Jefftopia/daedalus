@@ -10,21 +10,13 @@ import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
     template: `
     <div class="jumbotron jumbotron daedalus-jumbo">
         <div class="container">
-            <h1 class="display-5">Know everyhting.</h1>
+            <h1 class="display-5">Know everything.</h1>
             <p class="lead">ESports will never be the same. Quality data and analytics for competitive gaming.</p>                        
         </div>        
     </div>
     <nav class="navbar navbar-light">
         <div class="container">
         <a class="navbar-brand">Find a Game</a>
-            <form class="form-inline pull-right">
-                <select class="form-control"
-                    <option>one</option>
-                    <option>two</option>
-                    <option>three</option>
-                </select>
-                <button class="btn btn-primary-outline" type="submit" >Button</button>
-            </form>                
         </div>
     </nav>
     <div class="container">

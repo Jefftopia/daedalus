@@ -1,5 +1,7 @@
-System.register(['core-js/client/shim', 'angular2/bundles/angular2-polyfills', 'angular2/bundles/http', 'angular2/bundles/router', 'angular2/platform/browser', 'angular2/router', './daedalus'], function(exports_1) {
-    var browser_1, router_1, daedalus_1;
+System.register(['core-js/client/shim', 'angular2/bundles/angular2-polyfills', 'angular2/bundles/http', 'angular2/bundles/router', 'angular2/platform/browser', 'angular2/router', './daedalus', './services/dotaMatches.service', './services/dotaMatchDetail.service'], function(exports_1, context_1) {
+    "use strict";
+    var __moduleName = context_1 && context_1.id;
+    var browser_1, router_1, daedalus_1, dotaMatches_service_1, dotaMatchDetail_service_1;
     return {
         setters:[
             function (_1) {},
@@ -14,10 +16,18 @@ System.register(['core-js/client/shim', 'angular2/bundles/angular2-polyfills', '
             },
             function (daedalus_1_1) {
                 daedalus_1 = daedalus_1_1;
+            },
+            function (dotaMatches_service_1_1) {
+                dotaMatches_service_1 = dotaMatches_service_1_1;
+            },
+            function (dotaMatchDetail_service_1_1) {
+                dotaMatchDetail_service_1 = dotaMatchDetail_service_1_1;
             }],
         execute: function() {
             browser_1.bootstrap(daedalus_1.Daedalus, [
-                router_1.ROUTER_PROVIDERS
+                router_1.ROUTER_PROVIDERS,
+                dotaMatches_service_1.DotaMatchesService,
+                dotaMatchDetail_service_1.DotaMatchDetailService
             ]);
         }
     }

@@ -1,4 +1,9 @@
-import { Http } from 'angular2/http';
+import { Http, Response } from 'angular2/http';
+//import { Observable } from 'rxjs/Rx';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/catch';
 
 /*
     baseUrl: string =  'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?';
@@ -30,36 +35,51 @@ export abstract class DotaRestDao {
         this.http = http;
     }
 
+    // returns observable array of any dota model data
     protected _get(url: string) {
-        return this.http.get(url + DotaRestDao.REQUEST_SUFFIX).map(res => {
-            return res.json();
-        })
+        return this.http.get(url + DotaRestDao.REQUEST_SUFFIX)
+            .map(this.extractData)
+            .catch(this.errorHandler);
     }
     
     protected _query(url: string) {
         //TODO: serialize search using rules above;
     }
     
+    private extractData(res: Response) {
+        if (res.status < 200 || res.status >= 300) {
+            throw new Error('Bad response status: ' + res.status);
+        }
+        let body = res.json();
+        return body.data || { };
+    }
+        
+    private errorHandler(error: any) {
+        let errMsg = error.message || 'Server error';
+        console.error(errMsg);
+        return Observable.throw(errMsg);
+    }
+                
     /**
      * ////
      * LEGACY
      * ////
      */
 
-    public getData(options: getDataOptions) {
-        if (options.baseUrl == null)
-            throw 'Dota data request requires a baseUrl';
+    // public getData(options: getDataOptions) {
+    //     if (options.baseUrl == null)
+    //         throw 'Dota data request requires a baseUrl';
             
-        let paramString: string = this.processRequestParams(options.filterOptions);
+    //     let paramString: string = this.processRequestParams(options.filterOptions);
 
-        if (options.useKey)
-            paramString = paramString + DotaRestDao.REQUEST_SUFFIX;
+    //     if (options.useKey)
+    //         paramString = paramString + DotaRestDao.REQUEST_SUFFIX;
         
-        return this.http.get(options.baseUrl + paramString).map(res => {
-            return res.json();
-        });
+    //     return this.http.get(options.baseUrl + paramString).map(res => {
+    //         return res.json();
+    //     });
 
-    }
+    // }
 
     //TODO: make better
     private processRequestParams(options: Object): string {

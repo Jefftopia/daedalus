@@ -24,10 +24,6 @@ export class DotaMatchesService extends DotaRestDao {
 
     private static BASE_URL: string = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?';
     
-    constructor() {
-        super(http: Http);
-    }
-
     public getMatches(): any {   
         return this._get(DotaMatchesService.BASE_URL);
     }

@@ -5,10 +5,6 @@ export class DotaMatchDetailService extends DotaRestDao {
 
     public static BASE_URL: string = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?';
     
-    constructor() {
-        super(http: Http);
-    }
-
     public getMatchDetails(): any {   
         return this._get(DotaMatchDetailService.BASE_URL);
     }

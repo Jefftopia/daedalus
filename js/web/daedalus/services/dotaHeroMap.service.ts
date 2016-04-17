@@ -135,7 +135,7 @@ export class HeroMap {
     
     }
     
-    public getHeroIdByString(heroName: string): number {
+    public getHeroIdByString(heroName: string): string {
         let heroes = this.heroDict;
         
         for (let prop in heroes) {
@@ -149,7 +149,7 @@ export class HeroMap {
             
         }
         
-        return -1;
+        return '-1';
     
     }
     

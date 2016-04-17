@@ -1,6 +1,9 @@
 import { Component, OnInit,  } from 'angular2/core';
 import { COMMON_DIRECTIVES } from 'angular2/common';
 import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
+import { LaunchPadComponent } from './components/launchPad/launchPad.component';
+import { MatchDetailComponent } from './components/matchDetail/matchDetail.component';
+import { MatchesComponent } from './components/matches/matches.component';
 
 @Component({
     selector: 'daedalus',
@@ -11,8 +14,10 @@ import { RouteConfig, ROUTER_DIRECTIVES, Router } from 'angular2/router';
         <div class="container">
             <a href="#" class="navbar-brand">Daedalus</a>
             <ul class="nav navbar-nav">
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="nav-link" [routerLink]="['LaunchPad']">LaunchPad</a>          
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" [routerLink]="['Matches']">Matches</a>        
                 </li>
             </ul>

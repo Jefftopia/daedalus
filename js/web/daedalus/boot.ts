@@ -1,3 +1,5 @@
+/// <reference path="../node_modules/angular2/typings/browser.d.ts" />
+
 import 'core-js/client/shim';
 import 'angular2/bundles/angular2-polyfills';
 import 'angular2/bundles/http';

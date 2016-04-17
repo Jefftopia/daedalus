@@ -2,7 +2,7 @@ import { Component, OnInit, OnChanges, SimpleChange, ChangeDetectionStrategy } f
 import { COMMON_DIRECTIVES } from 'angular2/common';
 import { FORM_DIRECTIVES } from 'angular2/common';
 import { RouteConfig, ROUTER_DIRECTIVES, Router, RouteParams } from 'angular2/router';
-import { DotaMatchDetailService } from '../../services/dotaMatchDetail.service' ;
+import { DotaMatchDetailService } from '../../services/dotaMatchDetail.service';
 import { ItemMap } from '../../services/dotaItemMap.service' ;
 import { HeroMap } from '../../services/dotaHeroMap.service' ;
 
@@ -87,7 +87,7 @@ export interface DotaHttpMatchDetailsOptions {
         </div>
     `    
 })
-export class MatchDetailsView implements OnInit {
+export class MatchDetailComponent implements OnInit {
 
     private matchDetailService: DotaMatchDetailService;
 
